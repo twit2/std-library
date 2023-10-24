@@ -4,9 +4,6 @@
   "description": "",
   "main": "dist/Index.js",
   "types": "dist/Index.d.ts",
-  "files": [
-    "/dist"
-  ],
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
