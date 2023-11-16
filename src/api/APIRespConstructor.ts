@@ -25,6 +25,15 @@ function fail<T>(code: number, message: string, data?: T): APIResponse<T> {
 }
 
 /**
+ * Constructs a Success response.
+ * @param code The code to use.
+ * @param message The message to send.
+ */
+function success<T>(data?: T): APIResponse<T> {
+    return create(true, 0, "", data);
+}
+
+/**
  * Creates a response from an existing code.
  * @param data The data to use.
  */
@@ -40,6 +49,7 @@ function fromCode<T>(code: number, data?: T) {
 }
 
 export const APIRespConstructor = {
+    success,
     fromCode,
     fail,
     create
