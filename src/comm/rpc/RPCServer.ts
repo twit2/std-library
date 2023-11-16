@@ -48,12 +48,15 @@ export class RPCServer {
             try {
                 const func = this._getFunc(msg.message.name);
 
-                if(!func)
+                if(!func) {
+                    console.log(`RPC fail [${queueName}]: Function ${msg.message.name}() not found.`)
                     return void this._pubResponse({ success: false, code: 1, message: "Error: function not found." })
+                }
 
                 const result = await func.callback(...msg.message.arguments);
                 await this._pubResponse({ success: true, code: 0, message: "", data: result });
             } catch(e) {
+                console.log(`RPC fail [${queueName}]: Function ${msg.message.name}() threw exception: ${(e as Error).message || "<unknown>"}`)
                 await this._pubResponse({ success: false, code: 2, message: `Error: exception occured: ${(e as Error).message || "<unknown>"}` })
             }
         });
