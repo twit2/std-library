@@ -1,4 +1,5 @@
 import { APIResponse } from "./APIResponse";
+import { codeToResp } from "./APIResponseCodes";
 
 /**
  * Constructs a response.
@@ -23,7 +24,23 @@ function fail<T>(code: number, message: string, data?: T): APIResponse<T> {
     return create(false, code, message, data);
 }
 
+/**
+ * Creates a response from an existing code.
+ * @param data The data to use.
+ */
+function fromCode<T>(code: number, data?: T) {
+    const r = codeToResp(code);
+
+    return {
+        code,
+        success: r.success,
+        message: r.message,
+        data
+    }
+}
+
 export const APIRespConstructor = {
+    fromCode,
     fail,
     create
 }
