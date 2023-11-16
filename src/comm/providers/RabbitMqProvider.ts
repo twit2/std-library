@@ -17,13 +17,12 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
 
     /**
      * Sets up the RabbitMQ connection.
-     * @param hostname The hostname of the database.
-     * @param port The port to use.
+     * @param url The URL string.
      */
-    async setup(hostname: string, port: number): Promise<void> {
+    async setup(url: string): Promise<void> {
         try {
             console.log(`Connecting to rabbitmq...`);
-            this.client = await amqp.connect(`amqp://${hostname}:${port}`);
+            this.client = await amqp.connect(url);
         } catch(e) {
             console.error(`RabbitMQ Error : ${e}`);
         }

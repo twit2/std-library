@@ -13,7 +13,7 @@ interface DummyChObject {
 export class NullMqProvider extends MsgQueueProvider {
     protected channels: DummyChObject[] = [];
 
-    async setup(hostname: string, port: number): Promise<void> {
+    async setup(url: string): Promise<void> {
         /* empty ... */
     }
     

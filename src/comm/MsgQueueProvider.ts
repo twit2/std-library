@@ -11,10 +11,9 @@ type ConsumerCallback<T> = (message: QueueMessage<T>) => void;
 export abstract class MsgQueueProvider {
     /**
      * Sets up the queue provider.
-     * @param hostname The hostname to use.
-     * @param port The port to use.
+     * @param url The URL string.
      */
-    abstract setup(hostname: string, port: number): Promise<void>;
+    abstract setup(url: string): Promise<void>;
 
     /**
      * Opens a new channel.
