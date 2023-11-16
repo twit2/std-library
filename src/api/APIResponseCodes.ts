@@ -4,14 +4,16 @@ export enum APIResponseCodes {
     // 1000x - generic errors
     SERVER_ERROR = 1000,
     NOT_FOUND = 1001,
-    INVALID_REQUEST_BODY = 1002
+    INVALID_REQUEST_BODY = 1002,
+    ACCESS_DENIED = 1003
 }
 
 const responses = [
     { code: APIResponseCodes.GENERIC, message: "General failure.", success: false },
     { code: APIResponseCodes.SERVER_ERROR, message: "Server error.", success: false },
     { code: APIResponseCodes.NOT_FOUND, message: "Resource not found.", success: false },
-    { code: APIResponseCodes.INVALID_REQUEST_BODY, message: "Invalid request body.", success: false }
+    { code: APIResponseCodes.INVALID_REQUEST_BODY, message: "Invalid request body.", success: false },
+    { code: APIResponseCodes.ACCESS_DENIED, message: "Access denied.", success: false }
 ]
 
 /**
