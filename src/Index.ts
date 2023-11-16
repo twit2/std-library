@@ -5,7 +5,7 @@ import { APIResponseCodes } from './api/APIResponseCodes';
 import { MsgQueueProvider } from './comm/MsgQueueProvider';
 import { NullMqProvider } from './comm/providers/NullMqProvider';
 import { RabbitMQQueueProvider } from './comm/providers/RabbitMqProvider';
-import { User } from './uam/User';
+import { UserProfile } from './uam/User';
 import { generateId } from './util/IdGen';
 
 /**
@@ -24,7 +24,7 @@ export {
     APIResponseCodes,
     APIRespConstructor,
     MsgQueue,
-    User,
+    UserProfile as User,
     Limits,
     generateId
 }

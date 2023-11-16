@@ -1,7 +1,7 @@
 /**
  * Represents a user account.
  */
-export interface User {
+export interface UserProfile {
     id: string;
     displayName: string;
     username: string;
@@ -9,4 +9,6 @@ export interface User {
     avatarURL: string;
     biography: string;
     dateJoined: Date;
+    following: string[];
+    followers: string[];
 }
