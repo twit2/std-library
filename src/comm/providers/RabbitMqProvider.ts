@@ -1,7 +1,7 @@
 import { generateId } from "../../Index";
 import { MsgQueueProvider } from "../MsgQueueProvider";
 import { QueueMessage } from "../QueueMessage";
-import * as amqp  from 'amqplib';
+import * as amqp from 'amqplib';
 
 interface RMQChannel {
     name: string;
