@@ -33,7 +33,7 @@ async function handle(req: Request, res: Response, next: NextFunction) {
         next();
     } catch(e) {
         res.statusCode = 403;
-        res.end(JSON.stringify(APIRespConstructor.fail(APIResponseCodes.GENERIC, ((e as Error).message) || "<no information>")));
+        res.end(JSON.stringify(APIRespConstructor.fail(APIResponseCodes.GENERIC, (e as Error).message)));
     }
 
     res.end();
