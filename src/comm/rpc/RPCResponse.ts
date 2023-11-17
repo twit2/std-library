@@ -3,4 +3,5 @@ export interface RPCResponse<T> {
     code: number;
     message: string;
     data?: T;
+    jobId: string;
 }

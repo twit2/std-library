@@ -29,7 +29,10 @@ export class RPCClient {
 
         await this.mq.consume<RPCResponse<any>>(`${queueName}_rpcresp`, (msg) => {
             // Process response
-            console.log(msg);
+            const job = this.pendingJobs.find(x => x.jobId == msg.message.jobId);
+
+            if(job)
+                job.callback(msg.message.data);
         });
     }
 
