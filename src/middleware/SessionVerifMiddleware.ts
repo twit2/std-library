@@ -33,7 +33,7 @@ async function handle(req: Request, res: Response, next: NextFunction) {
         next();
     } catch(e) {
         res.statusCode = 403;
-        res.end(JSON.stringify(APIRespConstructor.fail(APIResponseCodes.GENERIC, `Access denied: ${e}.`)));
+        res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED)));
     }
 
     res.end();
