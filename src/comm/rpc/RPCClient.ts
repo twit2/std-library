@@ -6,6 +6,7 @@ import { RPCRequestMsg } from "./RPCServer";
 interface PendingRPCJob {
     jobId: string;
     callback: (data: any) => void;
+    fail: (message: string) => void;
 }
 
 export class RPCClient {
@@ -27,12 +28,16 @@ export class RPCClient {
         await this.mq.openQueue(`${queueName}_rpcreq`);
         await this.mq.openQueue(`${queueName}_rpcresp`);
 
-        await this.mq.consume<RPCResponse<any>>(`${queueName}_rpcresp`, (msg) => {
+        await this.mq.consume<RPCResponse<any>>(`${queueName}_rpcresp`, (jMsg) => {
             // Process response
-            const job = this.pendingJobs.find(x => x.jobId == msg.message.jobId);
+            const job = this.pendingJobs.find(x => x.jobId == jMsg.message.jobId);
 
-            if(job)
-                job.callback(msg.message.data);
+            if(job) {
+                if(jMsg.message.success)
+                    job.callback(jMsg.message.data);
+                else
+                    job.fail(jMsg.message.message);
+            }
         });
     }
 
@@ -63,6 +68,11 @@ export class RPCClient {
                     this._dequeueJob(jobId);
                     clearTimeout(timeout);
                     resolve(data);
+                },
+                fail: (message: string) => {
+                    this._dequeueJob(jobId);
+                    clearTimeout(timeout);
+                    reject(message)
                 }
             });
 
