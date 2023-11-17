@@ -50,7 +50,7 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
         if(!ch)
             throw new Error("Channel not created.");
 
-        await ch?.assertQueue(name, { durable: false });
+        await ch?.assertQueue(name, { durable: false, autoDelete: true });
 
         this.channels.push({
             name,
@@ -76,6 +76,7 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
 
             let msgObj = JSON.parse(msg.content.toString()) as QueueMessage<T>;
             cb(msgObj);
+            chObj.ch.ack(msg);
         });
     }
 
