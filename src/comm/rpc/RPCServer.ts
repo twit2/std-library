@@ -67,7 +67,7 @@ export class RPCServer {
      * @param rpcResp 
      */
     async _pubResponse<T>(rpcResp: RPCResponse<T>) {
-        if(!rpcResp.code)
+        if(rpcResp.code == null)
             throw new Error("Code required.");
         
         await this.mq.produce<RPCResponse<T>>(`${this.queueName}_rpcresp`, rpcResp);
