@@ -11,6 +11,7 @@ import { RPCServer } from './comm/rpc/RPCServer';
 import { SessionVerifierMiddleware } from './middleware/SessionVerifMiddleware';
 import { UserProfile } from './uam/User';
 import { generateId } from './util/IdGen';
+import { Regexes } from './util/Regexes';
 
 /**
  * Message queue module.
@@ -28,6 +29,7 @@ const MsgQueue = {
 }
 
 export {
+    Regexes,
     SessionVerifierMiddleware,
     APIResponse,
     APIResponseCodes,
