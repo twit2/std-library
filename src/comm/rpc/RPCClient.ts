@@ -56,7 +56,7 @@ export class RPCClient {
      * @param name The name of the function to call.
      * @param args The arguments to pass.
      */
-    makeCall<T>(name: string, ...args: string[]): Promise<T> {
+    makeCall<T>(name: string, ...args: any[]): Promise<T> {
         const jobId = generateId({ procId: process.ppid, workerId: process.pid });
         let timeout: NodeJS.Timeout;
 
