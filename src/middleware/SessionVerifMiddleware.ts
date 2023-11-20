@@ -40,8 +40,6 @@ async function handle(req: Request, res: Response, next: NextFunction) {
         res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED)));
         console.error(e);
     }
-
-    res.end();
 }
 
 export const SessionVerifierMiddleware = {
