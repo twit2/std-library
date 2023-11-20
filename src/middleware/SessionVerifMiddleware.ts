@@ -13,7 +13,7 @@ async function init(client: RPCClient) {
 /**
  * Handles session verification.
  */
-async function handle(req: Request & WithT2Session, res: Response, next: NextFunction) {
+async function handle(req: Request, res: Response, next: NextFunction) {
     res.contentType('json');
     const bearerToken = req.headers.authorization?.substring(7);
     
@@ -31,7 +31,8 @@ async function handle(req: Request & WithT2Session, res: Response, next: NextFun
             return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED)));
         }
 
-        req.session = sessData;
+        let req2 = req as Request & WithT2Session;
+        req2.session = sessData;
 
         next();
     } catch(e) {
