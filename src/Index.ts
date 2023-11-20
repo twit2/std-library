@@ -8,6 +8,7 @@ import { RabbitMQQueueProvider } from './comm/providers/RabbitMqProvider';
 import { RPCClient } from './comm/rpc/RPCClient';
 import { RPCResponse } from './comm/rpc/RPCResponse';
 import { RPCServer } from './comm/rpc/RPCServer';
+import { ErrorHandlingMiddleware } from './middleware/ErrorHandlingMiddleware';
 import { SessionVerifierMiddleware } from './middleware/SessionVerifMiddleware';
 import { UserProfile } from './uam/User';
 import { generateId } from './util/IdGen';
@@ -31,6 +32,7 @@ const MsgQueue = {
 export {
     Regexes,
     SessionVerifierMiddleware,
+    ErrorHandlingMiddleware,
     APIResponse,
     APIResponseCodes,
     APIRespConstructor,
