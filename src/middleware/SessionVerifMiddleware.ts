@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { APIRespConstructor } from "../api/APIRespConstructor";
 import { APIResponseCodes } from "../api/APIResponseCodes";
 import { RPCClient } from "../comm/rpc/RPCClient";
+import { T2Session, WithT2Session } from "../session/T2Session";
 
 let rpcc: RPCClient;
 
@@ -12,7 +13,7 @@ async function init(client: RPCClient) {
 /**
  * Handles session verification.
  */
-async function handle(req: Request, res: Response, next: NextFunction) {
+async function handle(req: Request & WithT2Session, res: Response, next: NextFunction) {
     res.contentType('json');
     const bearerToken = req.headers.authorization?.substring(7);
     
@@ -23,12 +24,14 @@ async function handle(req: Request, res: Response, next: NextFunction) {
 
     try {
         // Check the token
-        const jwt = await rpcc.makeCall("verify-user", bearerToken);
+        const sessData = await rpcc.makeCall<T2Session>("verify-user", bearerToken);
 
-        if(!jwt) {
+        if(!sessData) {
             res.statusCode = 403;
             return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED)));
         }
+
+        req.session = sessData;
 
         next();
     } catch(e) {

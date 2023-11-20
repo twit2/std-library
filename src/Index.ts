@@ -10,6 +10,7 @@ import { RPCResponse } from './comm/rpc/RPCResponse';
 import { RPCServer } from './comm/rpc/RPCServer';
 import { ErrorHandlingMiddleware } from './middleware/ErrorHandlingMiddleware';
 import { SessionVerifierMiddleware } from './middleware/SessionVerifMiddleware';
+import { T2Session, WithT2Session } from './session/T2Session';
 import { UserProfile } from './uam/User';
 import { generateId } from './util/IdGen';
 import { Regexes } from './util/Regexes';
@@ -30,6 +31,8 @@ const MsgQueue = {
 }
 
 export {
+    T2Session,
+    WithT2Session,
     Regexes,
     SessionVerifierMiddleware,
     ErrorHandlingMiddleware,
