@@ -20,5 +20,9 @@ export const Limits = {
     userProfile: {
         displayName: { min: 0, max: 64 },
         biography: { min: 0, max: 256 }
+    },
+    /** Posts limits */
+    posts: {
+        tcontent: { min: 1, max: 280 }
     }
 }
