@@ -12,6 +12,15 @@ interface DummyChObject {
  */
 export class NullMqProvider extends MsgQueueProvider {
     protected channels: DummyChObject[] = [];
+    private testMode: boolean = false;
+
+    /**
+     * Creates a new null mq provider.
+     */
+    constructor(opts: { testMode: boolean } = { testMode: false }) {
+        super();
+        this.testMode = opts.testMode;
+    }
 
     async setup(url: string): Promise<void> {
         /* empty ... */
@@ -31,7 +40,7 @@ export class NullMqProvider extends MsgQueueProvider {
      * @param name The channel name to use.
      */
     async openQueue(name: string): Promise<void> {
-        if(this.getChannel(name) != null)
+        if((this.getChannel(name) != null) && (!this.testMode))
             throw new Error("Channel exists!");
 
         this.channels.push({
