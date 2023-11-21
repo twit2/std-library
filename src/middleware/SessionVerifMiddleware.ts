@@ -28,6 +28,7 @@ async function handle(req: Request, res: Response, next: NextFunction) {
 
         if(!sessData) {
             res.statusCode = 403;
+            console.log("-- Session data debug failure --");
             console.log(sessData); // Little debug statement
             return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.SERVER_ERROR)));
         }
