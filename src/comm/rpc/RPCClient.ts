@@ -86,7 +86,7 @@ export class RPCClient {
             timeout = setTimeout(()=>{
                 this._dequeueJob(jobId);
                 reject("RPC request timeout.");
-            }, 4000);
+            }, 9000);
         });
     }
 }
