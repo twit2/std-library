@@ -28,7 +28,8 @@ async function handle(req: Request, res: Response, next: NextFunction) {
 
         if(!sessData) {
             res.statusCode = 403;
-            return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED)));
+            console.log(sessData); // Little debug statement
+            return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.SERVER_ERROR)));
         }
 
         let req2 = req as Request & WithT2Session;
