@@ -74,9 +74,9 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
             if(!msg)
                 return;
 
+            chObj.ch.ack(msg);
             let msgObj = JSON.parse(msg.content.toString()) as QueueMessage<T>;
             cb(msgObj);
-            chObj.ch.ack(msg);
         });
     }
 

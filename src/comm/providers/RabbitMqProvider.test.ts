@@ -2,7 +2,7 @@ import { RabbitMQQueueProvider } from "./RabbitMqProvider";
 const mock_amqp = require('mock-amqplib');
 
 /**
- * Mock redis provider.
+ * Mock Rmq provider.
  * 
  * This simply creates a mock client in place of a real one.
  */
@@ -23,7 +23,7 @@ interface MockQueueMessage {
     text: string;
 }
 
-describe('redis msg queue tests', () => {
+describe('rabbitmq msg queue tests', () => {
     let rmq: MockRabbitMQQueueProvider;
 
     beforeAll(async() => {

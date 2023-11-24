@@ -42,7 +42,13 @@ export class RPCServer {
             if((typeof msg.message.name !== 'string') || (msg.message.name.trim() == ""))
                 return;
 
-            console.log(`RPC call [${queueName}] ${msg.message.name}()`);
+            let argTypes = "";
+
+            for(let a of msg.message.arguments)
+                argTypes += `${typeof a}, `;
+
+            argTypes = argTypes.substring(0, argTypes.length - 2);
+            console.log(`RPC call [${queueName}] ${msg.message.name}(${argTypes})`);
             
             // Do the call
             try {
