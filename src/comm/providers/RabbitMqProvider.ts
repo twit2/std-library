@@ -14,6 +14,8 @@ const EXCG_TYPES = {
     [GenericExchangeType.fanout]: "fanout"
 }
 
+const SYS_EXCHG = '';
+
 /**
  * Represents a RabbitMQ queue provider.
  */
@@ -32,7 +34,7 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
             this.client = await amqp.connect(url);
 
             // open system exchange
-            await this.openExchange('', GenericExchangeType.direct);
+            await this.openExchange(SYS_EXCHG, GenericExchangeType.direct);
         } catch(e) {
             console.error(`RabbitMQ Error : ${e}`);
         }
@@ -63,7 +65,8 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
         if(!ch)
             throw new Error("Channel not created.");
 
-        await ch.assertExchange(name, EXCG_TYPES[type], { durable: false });
+        if(name !== SYS_EXCHG) // We cannot alter the default exchange
+            await ch.assertExchange(name, EXCG_TYPES[type], { durable: false });
 
         this.exchanges.push({
             name,
@@ -87,7 +90,9 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
             throw new Error("Exchange not found.");
 
         await ex.ch.assertQueue(name, { durable: false, autoDelete: true });
-        await ex.ch.bindQueue(name, exchange, '');
+
+        if(exchange !== SYS_EXCHG) // Do not perform bind on system exchange
+            await ex.ch.bindQueue(name, exchange, '');
 
         this.queues.push(name);
     }
