@@ -1,5 +1,5 @@
 import { generateId } from "../../Index";
-import { MsgQueueProvider } from "../MsgQueueProvider";
+import { GenericExchangeType, MsgQueueProvider } from "../MsgQueueProvider";
 import { QueueMessage } from "../QueueMessage";
 
 interface DummyChObject {
@@ -7,91 +7,76 @@ interface DummyChObject {
     consumerFuncs: Function[];
 }
 
+// BIG TODO
+// Reimplement!
+
 /**
- * Represents a RabbitMQ queue provider.
+ * Represents a null queue provider.
  */
 export class NullMqProvider extends MsgQueueProvider {
-    protected channels: DummyChObject[] = [];
-    private testMode: boolean = false;
-
     /**
-     * Creates a new null mq provider.
+     * Sets up the queue provider.
+     * @param url The URL string.
      */
-    constructor(opts: { testMode: boolean } = { testMode: false }) {
-        super();
-        this.testMode = opts.testMode;
-    }
-
     async setup(url: string): Promise<void> {
-        /* empty ... */
-    }
-    
-    /**
-     * Gets a channel by name.
-     * @param name The name of the channel.
-     * @returns 
-     */
-    private getChannel(name: string) {
-        return this.channels.find(x => x.name == name);
+        
     }
 
     /**
-     * Opens a message queue channel.
+     * Opens a new exchange.
+     * @param name The name of the exchange to open.
+     * @param type The exchange type.
+     */
+    async openExchange(name: string, type: GenericExchangeType): Promise<void> {
+
+    }
+
+    /**
+     * Opens a new queue.
+     * @param name The name of the queue to open.
+     * @param exchange The exchange to use.
+     */
+    async openQueue(exchange: string, name: string): Promise<void> {
+
+    }
+
+    /**
+     * Creates a consumer.
      * @param name The channel name to use.
      */
-    async openQueue(name: string): Promise<void> {
-        if((this.getChannel(name) != null) && (!this.testMode))
-            throw new Error("Channel exists!");
+    async consume<T>(exchange: string, name: string, cb: (message: QueueMessage<T>) => void): Promise<void> {
 
-        this.channels.push({
-            name,
-            consumerFuncs: []
-        });
     }
 
     /**
-     * Creates a new consumer.
-     * @param name The name of the channel.
-     * @param cb The callback to use.
+     * Creates a producer.
+     * @param name The channel name to use.
      */
-    async consume<T>(name: string, cb: (message: QueueMessage<T>) => void): Promise<void> {
-        const chObj = this.getChannel(name);
+    async produce<T>(exchange: string, name: string, message: T): Promise<void> {
 
-        if(!chObj)
-            throw new Error("Channel does not exist.");
-
-        //this.client?.on('message', console.log);
-        chObj.consumerFuncs.push((msg: any) => {
-            if(!msg)
-                return;
-
-            cb(msg);
-        });
     }
 
     /**
-     * Produces a new message.
-     * @param name The channel name.
-     * @param message The message to send.
+     * Checks if an exchange exists.
+     * @param name The name of the exchange to check.
      */
-    async produce<T>(name: string, message: T): Promise<void> {
-        const chObj = this.getChannel(name);
-
-        if(!chObj)
-            throw new Error("Channel not found.");
-
-        for(let f of chObj.consumerFuncs) {
-            f({
-                id: generateId({ procId: process.ppid, workerId: process.pid }),
-                message
-            });
-        }
+    hasExchange(name: string): boolean {
+        return false;
     }
 
     /**
-     * Performs a shutdown.
+     * Checks if a queue exists.
+     * @param name The name of the exchange to check.
+     */
+    hasQueue(name: string): boolean {
+        return false;
+    }
+
+    /**
+     * Shuts down the message queue.
      */
     async shutdown(): Promise<void> {
-        this.channels = null as unknown as DummyChObject[];
+
     }
+
 }

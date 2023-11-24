@@ -1,11 +1,17 @@
 import { generateId } from "../../Index";
-import { MsgQueueProvider } from "../MsgQueueProvider";
+import { GenericExchangeType, MsgQueueProvider } from "../MsgQueueProvider";
 import { QueueMessage } from "../QueueMessage";
 import * as amqp from 'amqplib';
 
-interface RMQChannel {
+interface RMQExchange {
     name: string;
+    type: GenericExchangeType;
     ch: amqp.Channel;
+}
+
+const EXCG_TYPES = {
+    [GenericExchangeType.direct]: "direct",
+    [GenericExchangeType.fanout]: "fanout"
 }
 
 /**
@@ -13,7 +19,8 @@ interface RMQChannel {
  */
 export class RabbitMQQueueProvider extends MsgQueueProvider {
     protected client?: amqp.Connection;
-    protected channels: RMQChannel[] = [];
+    protected exchanges: RMQExchange[] = [];
+    protected queues: string[] = [];
 
     /**
      * Sets up the RabbitMQ connection.
@@ -23,78 +30,118 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
         try {
             console.log(`Connecting to rabbitmq...`);
             this.client = await amqp.connect(url);
+
+            // open system exchange
+            await this.openExchange('', GenericExchangeType.direct);
         } catch(e) {
             console.error(`RabbitMQ Error : ${e}`);
         }
     }
-    
+
     /**
-     * Gets a channel by name.
-     * @param name The name of the channel.
-     * @returns 
+     * Finds an exchange by name.
+     * @param name The name of the exchange to find.
      */
-    private getChannel(name: string) {
-        return this.channels.find(x => x.name == name);
+    _findEx(name: string): RMQExchange | undefined {
+        return this.exchanges.find(x => x.name == name);
     }
 
     /**
-     * Opens a message queue channel.
-     * @param name The channel name to use.
+     * Opens a new exchange.
+     * @param name The name of the exchange to open.
+     * @param type The exchange type.
      */
-    async openQueue(name: string): Promise<void> {
-        if(this.getChannel(name) != null)
-            throw new Error("Channel exists!");
+    async openExchange(name: string, type: GenericExchangeType): Promise<void> {
+        const ex = this._findEx(name);
 
+        if(ex)
+            throw new Error("Exchange is already open.");
+
+        // Create channel for exchange
         const ch = await this.client?.createChannel();
 
         if(!ch)
             throw new Error("Channel not created.");
 
-        await ch?.assertQueue(name, { durable: false, autoDelete: true });
+        await ch.assertExchange(name, EXCG_TYPES[type], { durable: false });
 
-        this.channels.push({
+        this.exchanges.push({
             name,
+            type,
             ch
         });
     }
 
     /**
-     * Creates a new consumer.
-     * @param name The name of the channel.
-     * @param cb The callback to use.
+     * Opens a new queue.
+     * @param name The name of the queue to open.
+     * @param exchange The exchange to use.
      */
-    async consume<T>(name: string, cb: (message: QueueMessage<T>) => void): Promise<void> {
-        const chObj = this.getChannel(name);
+    async openQueue(exchange: string, name: string) {
+        if(this.queues.includes(name))
+            throw new Error("Queue exists.");
 
-        if(!chObj)
-            throw new Error("Channel does not exist.");
+        const ex = this._findEx(exchange);
 
-        //this.client?.on('message', console.log);
-        await chObj.ch.consume(name, (msg) => {
+        if(!ex)
+            throw new Error("Exchange not found.");
+
+        await ex.ch.assertQueue(name, { durable: false, autoDelete: true });
+        await ex.ch.bindQueue(name, exchange, '');
+
+        this.queues.push(name);
+    }
+
+    /**
+     * Creates a consumer.
+     * @param name The channel name to use.
+     */
+    async consume<T>(exchange: string, name: string, cb: (message: QueueMessage<T>) => void): Promise<void> {
+        const ex = this._findEx(exchange);
+
+        if(!ex)
+            throw new Error("Exchange does not exist.");
+
+        await ex.ch.consume(name, (msg) => {
             if(!msg)
                 return;
 
-            chObj.ch.ack(msg);
+            ex.ch.ack(msg);
             let msgObj = JSON.parse(msg.content.toString()) as QueueMessage<T>;
             cb(msgObj);
         });
     }
 
     /**
-     * Produces a new message.
-     * @param name The channel name.
-     * @param message The message to send.
+     * Creates a producer.
+     * @param name The channel name to use.
      */
-    async produce<T>(name: string, message: T): Promise<void> {
-        const chObj = this.getChannel(name);
+    async produce<T>(exchange: string, name: string, message: T): Promise<void> {
+        const ex = this._findEx(exchange);
 
-        if(!chObj)
-            throw new Error("Channel not found.");
+        if(!ex)
+            throw new Error("Exchange does not exist.");
 
-        chObj.ch.sendToQueue(name, Buffer.from(JSON.stringify({
+        ex.ch.sendToQueue(name, Buffer.from(JSON.stringify({
             id: generateId({ procId: process.ppid, workerId: process.pid }),
             message
         })));
+    }
+
+    /**
+     * Checks if an exchange exists.
+     * @param name The name of the exchange to check.
+     */
+    hasExchange(name: string): boolean {
+        return this._findEx(name) != undefined;
+    }
+
+    /**
+     * Checks if a queue exists.
+     * @param name The name of the exchange to check.
+     */
+    hasQueue(name: string): boolean {
+        return this.queues.includes(name);
     }
 
     /**

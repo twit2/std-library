@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "postinstall": "npm run build",
-    "test": "npx jest"
+    "test": "npx jest test.ts",
+    "test-unit": "npx jest unit.test.ts",
+    "test-integ": "npx jest int.test.ts"
   },
   "keywords": [],
   "author": "",

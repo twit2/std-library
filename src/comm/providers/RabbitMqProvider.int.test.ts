@@ -23,7 +23,7 @@ interface SumResult {
 }
 
 describe('rabbitmq provider integration tests', ()=> {
-    const TEST_RPC_QUEUE = "rpc-test";
+    const TEST_RPC_DOM = "rpc-test";
 
     // ---- 
     let cl_rmq: MockRabbitMQQueueProvider;
@@ -43,12 +43,12 @@ describe('rabbitmq provider integration tests', ()=> {
 
     test('setup rpc server and init queues', async ()=>{
         rpcs = new RPCServer(cl_rmq);
-        await rpcs.init(TEST_RPC_QUEUE);
+        await rpcs.init(TEST_RPC_DOM);
     });
 
     test('setup rpc client', async ()=>{
         rpcc = new RPCClient(sr_rmq);
-        await rpcc.init(TEST_RPC_QUEUE);
+        await rpcc.init(TEST_RPC_DOM);
     });
 
     test('server define test rpc functions', async() =>{
@@ -97,6 +97,40 @@ describe('rabbitmq provider integration tests', ()=> {
                     clearTimeout(tid);
                     reject(e);
                 }
+            }
+
+            resolve();
+        });
+    });
+
+    test('many clients make many simple calls to server', ()=>{
+        return new Promise<void>(async(resolve, reject) => {
+            for(let x = 0; x < 4; x++) {
+                let mq = new MockRabbitMQQueueProvider();
+                await mq.setup();
+    
+                let cl = new RPCClient(mq);
+                await cl.init(TEST_RPC_DOM);
+
+                for(let y = 0; y < 10; y++) {
+                    let tid = setTimeout(()=>reject("Timeout!"), 2000);
+                    const operandA = Math.floor(Math.random() * 1000);
+                    const operandB = Math.floor(Math.random() * 1000);
+                    const sum = operandA + operandB;
+    
+                    try {
+                        const value = await cl.makeCall<SumResult>('testfunc', operandA, operandB);
+                        expect(value.result).toBe(sum);
+                        clearTimeout(tid);
+                    } catch(e) {
+                        clearTimeout(tid);
+                        reject(e);
+                    }
+                }
+
+                await mq.shutdown();
+                mq = null as any;
+                cl = null as any;
             }
 
             resolve();

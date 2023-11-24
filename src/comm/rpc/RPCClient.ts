@@ -1,5 +1,5 @@
 import { generateId } from "../../Index";
-import { MsgQueueProvider } from "../MsgQueueProvider";
+import { GenericExchangeType, MsgQueueProvider } from "../MsgQueueProvider";
 import { RPCResponse } from "./RPCResponse";
 import { RPCRequestMsg } from "./RPCServer";
 
@@ -8,6 +8,8 @@ interface PendingRPCJob {
     callback: (data: any) => void;
     fail: (message: string) => void;
 }
+
+const SYS_RPCEX_NAME = 'rpcex';
 
 export class RPCClient {
     private mq: MsgQueueProvider;
@@ -20,15 +22,19 @@ export class RPCClient {
 
     /**
      * Initializes an RPC client.
-     * @param queueName The name of the queue.
+     * @param domain The name of the domain.
      */
-    async init(queueName: string) {
-        this.queueName = queueName;
+    async init(domain: string) {
+        this.queueName = domain;
 
-        await this.mq.openQueue(`${queueName}_rpcreq`);
-        await this.mq.openQueue(`${queueName}_rpcresp`);
+        // Setup exchange if needed
+        if(!this.mq.hasExchange(SYS_RPCEX_NAME))
+            await this.mq.openExchange(SYS_RPCEX_NAME, GenericExchangeType.fanout);
 
-        await this.mq.consume<RPCResponse<any>>(`${queueName}_rpcresp`, (jMsg) => {
+        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc_req`);
+        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc_resp`);
+
+        await this.mq.consume<RPCResponse<any>>(SYS_RPCEX_NAME, `${domain}_rpc_resp`, (jMsg) => {
             // Process response
             const job = this.pendingJobs.find(x => x.jobId == jMsg.message.jobId);
 
@@ -76,7 +82,7 @@ export class RPCClient {
                 }
             });
 
-            await this.mq.produce<RPCRequestMsg>(`${this.queueName}_rpcreq`, {
+            await this.mq.produce<RPCRequestMsg>(SYS_RPCEX_NAME, `${this.queueName}_rpc_req`, {
                 name,
                 jobId,
                 arguments: args
@@ -86,7 +92,7 @@ export class RPCClient {
             timeout = setTimeout(()=>{
                 this._dequeueJob(jobId);
                 reject("RPC request timeout.");
-            }, 9000);
+            }, 4000);
         });
     }
 }

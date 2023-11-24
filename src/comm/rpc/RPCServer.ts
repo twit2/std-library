@@ -1,4 +1,4 @@
-import { MsgQueueProvider } from "../MsgQueueProvider";
+import { GenericExchangeType, MsgQueueProvider } from "../MsgQueueProvider";
 import { RPCResponse } from "./RPCResponse";
 
 interface RPCFunction {
@@ -11,6 +11,8 @@ export interface RPCRequestMsg {
     jobId: string;
     arguments: any[];
 }
+
+const SYS_RPCEX_NAME = 'rpcex';
 
 /**
  * Remote procedure call server.
@@ -26,15 +28,19 @@ export class RPCServer {
 
     /**
      * Initializes the RPC server.
-     * @param queueName The name to use for the RPC queue.
+     * @param domain The name to use for the RPC queue.
      */
-    async init(queueName: string) {
-        this.queueName = queueName;
+    async init(domain: string) {
+        this.queueName = domain;
 
-        await this.mq.openQueue(`${queueName}_rpcreq`);
-        await this.mq.openQueue(`${queueName}_rpcresp`);
+        // Setup exchange if needed
+        if(!this.mq.hasExchange(SYS_RPCEX_NAME))
+            await this.mq.openExchange(SYS_RPCEX_NAME, GenericExchangeType.fanout);
 
-        await this.mq.consume<RPCRequestMsg>(`${queueName}_rpcreq`, async (msg) => {
+        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc_req`);
+        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc_resp`);
+
+        await this.mq.consume<RPCRequestMsg>(SYS_RPCEX_NAME, `${domain}_rpc_req`, async (msg) => {
             // Ensure call is of the right convention
             if(typeof msg.message.jobId !== 'string')
                 return;
@@ -48,21 +54,21 @@ export class RPCServer {
                 argTypes += `${typeof a}, `;
 
             argTypes = argTypes.substring(0, argTypes.length - 2);
-            console.log(`RPC call [${queueName}] ${msg.message.name}(${argTypes})`);
+            console.log(`RPC call [${domain}] ${msg.message.name}(${argTypes})`);
             
             // Do the call
             try {
                 const func = this._getFunc(msg.message.name);
 
                 if(!func) {
-                    console.log(`RPC fail [${queueName}]: Function ${msg.message.name}() not found.`)
+                    console.log(`RPC fail [${domain}]: Function ${msg.message.name}() not found.`)
                     return void this._pubResponse({ success: false, code: 1, message: "Error: function not found.", jobId: msg.message.jobId })
                 }
 
                 const result = await func.callback(...msg.message.arguments);
                 await this._pubResponse({ success: true, code: 0, message: "", data: result, jobId: msg.message.jobId });
             } catch(e) {
-                console.log(`RPC fail [${queueName}]: Function ${msg.message.name}() threw exception: ${(e as Error).message || "<unknown>"}`)
+                console.log(`RPC fail [${domain}]: Function ${msg.message.name}() threw exception: ${(e as Error).message || "<unknown>"}`)
                 await this._pubResponse({ success: false, code: 2, message: `Error: exception occured: ${(e as Error).message || "<unknown>"}`, jobId: msg.message.jobId })
             }
         });
@@ -76,7 +82,7 @@ export class RPCServer {
         if(rpcResp.code == null)
             throw new Error("Code required.");
         
-        await this.mq.produce<RPCResponse<T>>(`${this.queueName}_rpcresp`, rpcResp);
+        await this.mq.produce<RPCResponse<T>>(SYS_RPCEX_NAME, `${this.queueName}_rpc_resp`, rpcResp);
     }
 
     /**
