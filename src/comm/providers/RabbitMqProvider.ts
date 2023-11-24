@@ -134,6 +134,23 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
     }
 
     /**
+     * Publishes a message.
+     * @param exchange The exchange to publish to.
+     * @param message The message to send.
+     */
+    async publish<T>(exchange: string, message: T) {
+        const ex = this._findEx(exchange);
+
+        if(!ex)
+            throw new Error("Exchange does not exist.");
+
+        ex.ch.publish(exchange, '', Buffer.from(JSON.stringify({
+            id: generateId({ procId: process.ppid, workerId: process.pid }),
+            message
+        })));
+    }
+
+    /**
      * Checks if an exchange exists.
      * @param name The name of the exchange to check.
      */

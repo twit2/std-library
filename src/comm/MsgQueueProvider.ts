@@ -67,6 +67,13 @@ export abstract class MsgQueueProvider {
     abstract produce<T>(exchange: string, name: string, message: T): Promise<void>;
 
     /**
+     * Publishes a message.
+     * @param exchange The exchange to publish to.
+     * @param message The message to send.
+     */
+    abstract publish<T>(exchange: string, message: T): Promise<void>;
+
+    /**
      * Shuts down the message queue.
      */
     abstract shutdown(): Promise<void>;

@@ -57,6 +57,15 @@ export class NullMqProvider extends MsgQueueProvider {
     }
 
     /**
+     * Publishes a message.
+     * @param exchange The exchange to publish to.
+     * @param message The message to send.
+     */
+    async publish<T>(exchange: string, message: T) {
+        
+    }
+
+    /**
      * Checks if an exchange exists.
      * @param name The name of the exchange to check.
      */

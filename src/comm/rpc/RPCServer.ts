@@ -82,7 +82,7 @@ export class RPCServer {
         if(rpcResp.code == null)
             throw new Error("Code required.");
         
-        await this.mq.produce<RPCResponse<T>>(SYS_RPCEX_NAME, `${this.queueName}_rpc_resp`, rpcResp);
+        await this.mq.publish<RPCResponse<T>>(SYS_RPCEX_NAME, rpcResp);
     }
 
     /**
