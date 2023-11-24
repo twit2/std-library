@@ -14,8 +14,7 @@ class MockRabbitMQQueueProvider extends RabbitMQQueueProvider {
     }
 
     async setup() {
-        await super.setup('amqp://localhost:5672');
-        //this.client = await mock_amqp.connect(`amqp://localhost:5672`);
+        this.client = await mock_amqp.connect(`amqp://localhost:5672`);
     }
 }
 
