@@ -74,10 +74,10 @@ export class RabbitMQQueueProvider extends MsgQueueProvider {
             if(!msg)
                 return;
 
-            // TODO NOAck chObj.ch.ack(msg);
+            chObj.ch.ack(msg);
             let msgObj = JSON.parse(msg.content.toString()) as QueueMessage<T>;
             cb(msgObj);
-        }, { noAck: true });
+        });
     }
 
     /**
