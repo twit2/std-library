@@ -1,4 +1,5 @@
 import { Limits } from './Limits';
+import { APIError } from './api/APIError';
 import { APIRespConstructor } from './api/APIRespConstructor';
 import { APIResponse } from './api/APIResponse';
 import { APIResponseCodes } from './api/APIResponseCodes';
@@ -31,6 +32,7 @@ const MsgQueue = {
 }
 
 export {
+    APIError,
     T2Session,
     WithT2Session,
     Regexes,

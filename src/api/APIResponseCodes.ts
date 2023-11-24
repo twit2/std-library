@@ -8,6 +8,12 @@ export enum APIResponseCodes {
     ACCESS_DENIED = 1003
 }
 
+export interface APIResponseHead {
+    code: number;
+    success: boolean;
+    message: string;
+}
+
 const responses = [
     { code: APIResponseCodes.GENERIC, message: "General failure.", success: false },
     { code: APIResponseCodes.SERVER_ERROR, message: "Server error.", success: false },
@@ -21,7 +27,7 @@ const responses = [
  * @param code The code to get a message for.
  * @param data Additional data to add.
  */
-export function codeToResp(code: number, ...data: any[]) {
+export function codeToResp(code: number, ...data: any[]): APIResponseHead {
     let msg = responses.find(x => x.code == code);
 
     if(!msg)
