@@ -82,7 +82,7 @@ export class RPCClient {
                 }
             });
 
-            await this.mq.produce<RPCRequestMsg>(SYS_RPCEX_NAME, `${this.queueName}_rpc_req`, {
+            await this.mq.publish<RPCRequestMsg>(SYS_RPCEX_NAME, {
                 name,
                 jobId,
                 arguments: args
