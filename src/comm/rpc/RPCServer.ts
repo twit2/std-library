@@ -9,6 +9,7 @@ interface RPCFunction {
 export interface RPCRequestMsg {
     name: string;
     jobId: string;
+    clientId: string;
     arguments: any[];
 }
 
@@ -20,7 +21,7 @@ const SYS_RPCEX_NAME = 'rpcex';
 export class RPCServer {
     private mq: MsgQueueProvider;
     private fns: RPCFunction[] = [];
-    private queueName = "";
+    private clientQueues: string[] = [];
 
     constructor(mq: MsgQueueProvider) {
         this.mq = mq;
@@ -31,22 +32,31 @@ export class RPCServer {
      * @param domain The name to use for the RPC queue.
      */
     async init(domain: string) {
-        this.queueName = domain;
-
         // Setup exchange if needed
         if(!this.mq.hasExchange(SYS_RPCEX_NAME))
-            await this.mq.openExchange(SYS_RPCEX_NAME, GenericExchangeType.fanout);
+            await this.mq.openExchange(SYS_RPCEX_NAME, GenericExchangeType.direct);
 
-        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc_req`);
-        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc_resp`);
+        await this.mq.openQueue(SYS_RPCEX_NAME, `${domain}_rpc`);
 
-        await this.mq.consume<RPCRequestMsg>(SYS_RPCEX_NAME, `${domain}_rpc_req`, async (msg) => {
+        await this.mq.consume<RPCRequestMsg>(SYS_RPCEX_NAME, `${domain}_rpc`, async (msg) => {
             // Ensure call is of the right convention
             if(typeof msg.message.jobId !== 'string')
                 return;
 
             if((typeof msg.message.name !== 'string') || (msg.message.name.trim() == ""))
                 return;
+
+            // Ensure we have a client queue
+            if(typeof msg.message.clientId !== 'string')
+                return;
+            else {
+                const cq = this.clientQueues.find(x => x == msg.message.clientId);
+
+                if(!cq) {
+                    await this.mq.openQueue(SYS_RPCEX_NAME, `rpc_${msg.message.clientId}`);
+                    this.clientQueues.push(msg.message.clientId);
+                }
+            }
 
             let argTypes = "";
 
@@ -62,14 +72,14 @@ export class RPCServer {
 
                 if(!func) {
                     console.log(`RPC fail [${domain}]: Function ${msg.message.name}() not found.`)
-                    return void this._pubResponse({ success: false, code: 1, message: "Error: function not found.", jobId: msg.message.jobId })
+                    return void this._pubResponse(msg.message.clientId, { success: false, code: 1, message: "Error: function not found.", jobId: msg.message.jobId })
                 }
 
                 const result = await func.callback(...msg.message.arguments);
-                await this._pubResponse({ success: true, code: 0, message: "", data: result, jobId: msg.message.jobId });
+                await this._pubResponse(msg.message.clientId, { success: true, code: 0, message: "", data: result, jobId: msg.message.jobId });
             } catch(e) {
                 console.log(`RPC fail [${domain}]: Function ${msg.message.name}() threw exception: ${(e as Error).message || "<unknown>"}`)
-                await this._pubResponse({ success: false, code: 2, message: `Error: exception occured: ${(e as Error).message || "<unknown>"}`, jobId: msg.message.jobId })
+                await this._pubResponse(msg.message.clientId, { success: false, code: 2, message: `Error: exception occured: ${(e as Error).message || "<unknown>"}`, jobId: msg.message.jobId })
             }
         });
     }
@@ -78,11 +88,11 @@ export class RPCServer {
      * Publishes an RPC response.
      * @param rpcResp 
      */
-    async _pubResponse<T>(rpcResp: RPCResponse<T>) {
+    async _pubResponse<T>(clientId: string, rpcResp: RPCResponse<T>) {
         if(rpcResp.code == null)
             throw new Error("Code required.");
         
-        await this.mq.publish<RPCResponse<T>>(SYS_RPCEX_NAME, rpcResp);
+        await this.mq.produce<RPCResponse<T>>(SYS_RPCEX_NAME, `rpc_${clientId}`, rpcResp);
     }
 
     /**
