@@ -1,4 +1,5 @@
 import { Limits } from './Limits';
+import { APIDataPaginator } from './api/APIDataPaginator';
 import { APIError } from './api/APIError';
 import { APIRespConstructor } from './api/APIRespConstructor';
 import { APIResponse } from './api/APIResponse';
@@ -32,6 +33,7 @@ const MsgQueue = {
 }
 
 export {
+    APIDataPaginator,
     APIError,
     T2Session,
     WithT2Session,
