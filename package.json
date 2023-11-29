@@ -9,7 +9,8 @@
     "postinstall": "npm run build",
     "test": "npx jest test.ts",
     "test-unit": "npx jest unit.test.ts",
-    "test-integ": "npx jest int.test.ts"
+    "test-integ": "npx jest int.test.ts",
+    "test-coverage": "npx jest --coverage"
   },
   "keywords": [],
   "author": "",
