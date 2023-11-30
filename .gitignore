@@ -3,3 +3,6 @@ dist/
 _test.js
 # hidden files
 __*
+
+# Ignore git strip
+/__gitstrip
