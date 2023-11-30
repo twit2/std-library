@@ -16,6 +16,7 @@ import { T2Session, WithT2Session } from './session/T2Session';
 import { UserProfile } from './uam/User';
 import { generateId } from './util/IdGen';
 import { Regexes } from './util/Regexes';
+import { GenericPagedOp } from './op/GenericPagedOp';
 
 /**
  * Message queue module.
@@ -33,6 +34,7 @@ const MsgQueue = {
 }
 
 export {
+    GenericPagedOp,
     PaginatedAPIData,
     APIError,
     T2Session,
