@@ -19,6 +19,7 @@ import { Regexes } from './util/Regexes';
 import { GenericPagedOp } from './op/GenericPagedOp';
 import { VersionedDoc } from './types/VersionedDoc';
 import { AdminVerifMiddleware as AdminVeriferMiddleware } from './middleware/AdminVerifMiddleware';
+import { TestingUtils } from './testing/TestingUtils';
 
 /**
  * Message queue module.
@@ -53,5 +54,6 @@ export {
     UserProfile as User,
     Limits,
     generateId,
-    VersionedDoc
+    VersionedDoc,
+    TestingUtils
 }
