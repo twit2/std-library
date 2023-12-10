@@ -18,6 +18,7 @@ import { generateId } from './util/IdGen';
 import { Regexes } from './util/Regexes';
 import { GenericPagedOp } from './op/GenericPagedOp';
 import { VersionedDoc } from './types/VersionedDoc';
+import { AdminVerifMiddleware as AdminVeriferMiddleware } from './middleware/AdminVerifMiddleware';
 
 /**
  * Message queue module.
@@ -42,6 +43,7 @@ export {
     WithT2Session,
     Regexes,
     SessionVerifierMiddleware,
+    AdminVeriferMiddleware,
     ErrorHandlingMiddleware,
     APIResponse,
     APIResponseCodes,
