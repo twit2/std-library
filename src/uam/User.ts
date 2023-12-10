@@ -6,6 +6,7 @@ export interface UserProfile {
     displayName?: string;
     username: string;
     avatarURL?: string;
+    bannerURL?: string;
     biography?: string;
     dateJoined: Date;
     verified: boolean;
