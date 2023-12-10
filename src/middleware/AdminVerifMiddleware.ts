@@ -30,7 +30,7 @@ async function handle(req: Request, res: Response, next: NextFunction) {
 
         // 1 == admin
         if(role !== 1)
-            return res.end(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED));
+            return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.ACCESS_DENIED)));
 
         next();
     } catch(e) {
