@@ -17,6 +17,7 @@ import { UserProfile } from './uam/User';
 import { generateId } from './util/IdGen';
 import { Regexes } from './util/Regexes';
 import { GenericPagedOp } from './op/GenericPagedOp';
+import { VersionedDoc } from './types/VersionedDoc';
 
 /**
  * Message queue module.
@@ -49,5 +50,6 @@ export {
     MsgQueue,
     UserProfile as User,
     Limits,
-    generateId
+    generateId,
+    VersionedDoc
 }
