@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { APIRespConstructor } from "../api/APIRespConstructor";
 import { APIResponseCodes } from "../api/APIResponseCodes";
 import { RPCClient } from "../comm/rpc/RPCClient";
+import { WithT2Session } from "../session/T2Session";
 
 let rpcc: RPCClient;
 
@@ -14,16 +15,11 @@ async function init(client: RPCClient) {
  */
 async function handle(req: Request, res: Response, next: NextFunction) {
     res.contentType('json');
-    const bearerToken = req.headers.authorization?.substring(7);
-    
-    if((!bearerToken) || (bearerToken.trim() == "")) {
-        res.statusCode = 403;
-        return res.end(JSON.stringify(APIRespConstructor.fromCode(APIResponseCodes.INVALID_REQUEST_BODY)));
-    }
+    let req2 = req as Request & WithT2Session;
 
     try {
         // Check the token
-        const role = await rpcc.makeCall<number>("get-role", bearerToken);
+        const role = await rpcc.makeCall<number>("get-role", req2.session.id);
 
         if(role == null) {
             res.statusCode = 403;
