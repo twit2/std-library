@@ -6,3 +6,4 @@ __*
 
 # Ignore git strip
 /__gitstrip
+/coverage
