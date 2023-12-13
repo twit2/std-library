@@ -1,7 +1,7 @@
 import { GenericExchangeType, MsgQueueProvider } from "../MsgQueueProvider";
 import { RPCResponse } from "./RPCResponse";
 
-interface RPCFunction {
+export interface RPCFunction {
     name: string;
     callback: (...data: any) => Promise<any>;
 }

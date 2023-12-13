@@ -1,3 +1,5 @@
+import { RPCMock } from "./mocks/RPCMock";
+
 /**
  * Checks whether the callback fails.
  * @param cb The callback to test for.
@@ -30,5 +32,8 @@ async function mustFailAsync(cb: ()=>Promise<void>, message: string): Promise<vo
 
 export const TestingUtils = {
     mustFail,
-    mustFailAsync
+    mustFailAsync,
+    mocks: {
+        RPCMock
+    }
 }
